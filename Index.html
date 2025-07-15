@@ -1,1 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla Ingeniería Civil Química - 2023</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f8f9fa;
+      padding: 20px;
+    }
+    h1, h2 {
+      color: #1d3557;
+    }
+    .semestre {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    .ramo {
+      padding: 10px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      background-color: white;
+      cursor: pointer;
+      width: 220px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .ramo.aprobado {
+      text-decoration: line-through;
+      background-color: #d1e7dd;
+      border-color: #198754;
+      color: #198754;
+    }
+    .ramo.bloqueado {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Malla Ingeniería Civil Química - 2023</h1>
 
+  <!-- Semestres -->
+  <h2>1er Semestre</h2>
+  <div class="semestre">
+    <div class="ramo" id="IQU1100">IQU1100 - Introducción a la Ing. Química</div>
+    <div class="ramo" id="MAT1103">MAT1103 - Cálculo I</div>
+    <div class="ramo" id="QUI100D">QUI100D - Química General I</div>
+    <div class="ramo" id="CBF1000">CBF1000 - Biología para Ingeniería</div>
+    <div class="ramo" id="FGC1000">FGC1000 - Comunicación para la Ingeniería</div>
+  </div>
+
+  <h2>2do Semestre</h2>
+  <div class="semestre">
+    <div class="ramo bloqueado" id="MAT1203" data-prereq="MAT1103">MAT1203 - Cálculo II</div>
+    <div class="ramo bloqueado" id="QUI101D" data-prereq="QUI100D">QUI101D - Química General II</div>
+    <div class="ramo bloqueado" id="CBF1100" data-prereq="CBF1000">CBF1100 - Biología Celular</div>
+    <div class="ramo bloqueado" id="FIS1000">FIS1000 - Física I</div>
+    <div class="ramo bloqueado" id="FGH1000">FGH1000 - Historia de la Ingeniería</div>
+  </div>
+
+  <!-- Puedes seguir copiando esta estructura para los siguientes semestres -->
+
+  <script>
+    const ramos = document.querySelectorAll(".ramo");
+    ramos.forEach(ramo => {
+      ramo.addEventListener("click", () => {
+        ramo.classList.toggle("aprobado");
+        desbloquear();
+      });
+    });
+
+    function desbloquear() {
+      document.querySelectorAll(".ramo").forEach(ramo => {
+        const prereq = ramo.getAttribute("data-prereq");
+        if (prereq) {
+          const prereqAprobado = document.getElementById(prereq)?.classList.contains("aprobado");
+          if (prereqAprobado) {
+            ramo.classList.remove("bloqueado");
+          } else {
+            ramo.classList.add("bloqueado");
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
