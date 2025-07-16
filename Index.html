@@ -1,91 +1,158 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Malla Ingeniería Civil Química - 2023</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f8f9fa;
-      padding: 20px;
-    }
-    h1, h2 {
-      color: #1d3557;
-    }
-    .semestre {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 30px;
-    }
-    .ramo {
-      padding: 10px;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      background-color: white;
-      cursor: pointer;
-      width: 220px;
-      text-align: center;
-      transition: all 0.3s ease;
-    }
-    .ramo.aprobado {
-      text-decoration: line-through;
-      background-color: #d1e7dd;
-      border-color: #198754;
-      color: #198754;
-    }
-    .ramo.bloqueado {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Malla</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <script src="https://kit.fontawesome.com/82bef47541.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
-  <h1>Malla Ingeniería Civil Química - 2023</h1>
+  <h1 id="title">MiMalla</h1>
+  <h2 id="contadorRamos" style="margin-top: -15px; font-size: 18px; color: #444;">0 / 0 ramos aprobados</h2>
 
-  <!-- Semestres -->
-  <h2>1er Semestre</h2>
-  <div class="semestre">
-    <div class="ramo" id="IQU1100">IQU1100 - Introducción a la Ing. Química</div>
-    <div class="ramo" id="MAT1103">MAT1103 - Cálculo I</div>
-    <div class="ramo" id="QUI100D">QUI100D - Química General I</div>
-    <div class="ramo" id="CBF1000">CBF1000 - Biología para Ingeniería</div>
-    <div class="ramo" id="FGC1000">FGC1000 - Comunicación para la Ingeniería</div>
+  <div class="controls" id="controls">
+    <label for="numSemestres">¿Cuántos semestres tiene la carrera?</label>
+    <input type="number" id="numSemestres" min="1" placeholder="Ej: 10" />
+    <button id="btnCrearSemestres">Crear Semestres</button>
   </div>
 
-  <h2>2do Semestre</h2>
-  <div class="semestre">
-    <div class="ramo bloqueado" id="MAT1203" data-prereq="MAT1103">MAT1203 - Cálculo II</div>
-    <div class="ramo bloqueado" id="QUI101D" data-prereq="QUI100D">QUI101D - Química General II</div>
-    <div class="ramo bloqueado" id="CBF1100" data-prereq="CBF1000">CBF1100 - Biología Celular</div>
-    <div class="ramo bloqueado" id="FIS1000">FIS1000 - Física I</div>
-    <div class="ramo bloqueado" id="FGH1000">FGH1000 - Historia de la Ingeniería</div>
+  <div id="container" style="display:none;">
+    <div id="malla"></div>
+
+    <div class="categorias">
+      <h3>Categorías</h3>
+      <label for="categoriaNombre">Nombre:</label>
+      <input type="text" id="categoriaNombre" placeholder="Ej: Formación Básica">
+      <label for="categoriaColor">Color:</label>
+      <input type="color" id="categoriaColor" value="#6c5ce7">
+      <button id="btnAgregarCategoria">Agregar Categoría</button>
+      <div id="categorias"></div>
+    </div>
+
+    <div class="file-actions">
+      <button id="btnExportar">Exportar</button>
+      <button id="btnImportar">Importar</button>
+      <button id="btnNuevaMalla">Crear Malla Nueva</button>
+      <button id="btnToggleSellado">Sellar Malla</button>
+    </div>
   </div>
 
-  <!-- Puedes seguir copiando esta estructura para los siguientes semestres -->
+  <div id="modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <button id="btnCerrarModal">×</button>
+      <h3 id="modalTitulo">Agregar Ramo</h3>
+      <label for="ramoNombre">Nombre del ramo:</label>
+      <input type="text" id="ramoNombre">
+      <label>¿Tiene requisito?</label>
+      <select id="tieneRequisito">
+        <option value="no">No</option>
+        <option value="si">Sí</option>
+      </select>
+      <div id="requisitosContainer" style="display:none;">
+        <label>Selecciona requisito(s):</label>
+        <div id="listaRequisitos"></div>
+      </div>
+      <label for="ramoCategoria">Categoría:</label>
+      <select id="ramoCategoria"></select>
+      <button id="btnGuardarRamo">Listo</button>
+    </div>
+  </div>
 
-  <script>
-    const ramos = document.querySelectorAll(".ramo");
-    ramos.forEach(ramo => {
-      ramo.addEventListener("click", () => {
-        ramo.classList.toggle("aprobado");
-        desbloquear();
-      });
-    });
+  <button id="btnIrANotas" class="float-btn notas-btn">
+    <i class="fa-solid fa-note-sticky"></i>
+  </button>
 
-    function desbloquear() {
-      document.querySelectorAll(".ramo").forEach(ramo => {
-        const prereq = ramo.getAttribute("data-prereq");
-        if (prereq) {
-          const prereqAprobado = document.getElementById(prereq)?.classList.contains("aprobado");
-          if (prereqAprobado) {
-            ramo.classList.remove("bloqueado");
-          } else {
-            ramo.classList.add("bloqueado");
-          }
-        }
-      });
-    }
-  </script>
+  <button id="btnEstilos" class="float-btn">
+    <i class="fa-solid fa-palette"></i>
+  </button>
+
+  <div id="panelEstilos" class="panel-estilos" style="display: none;">
+    <button id="btnExportarEstilo" class="btn-estilo">Exportar Estilo</button>
+    <button id="btnImportarEstilo" class="btn-estilo">Importar Estilo</button>
+
+    <h3>Personalizar MiMalla</h3>
+
+    <label id="labelFondoTipo">Tipo de fondo:</label>
+    <select id="fondoTipo">
+      <option value="color">Color</option>
+      <option value="imagen">Imagen</option>
+    </select>
+
+    <label id="labelFondoColor">Fondo de la página:</label>
+    <input type="color" id="estiloFondoPagina" />
+
+    <label id="labelFondoImagen" style="display: none;">Selecciona una imagen:</label>
+    <input type="file" id="estiloFondoImagen" accept="image/*" style="display: none;" />
+
+    <label>Fondo de los semestres:</label>
+    <input type="color" id="estiloFondoSemestres" />
+
+    <label>Color de texto general:</label>
+    <input type="color" id="estiloTexto" />
+
+    <label>Color de borde de semestres:</label>
+    <input type="color" id="estiloBordeColor" />
+
+    <label>Color de botones:</label>
+    <input type="color" id="estiloBotones" />
+
+    <button id="btnAplicarEstilo" class="btn-estilo">Aplicar Estilo</button>
+  </div>
+
+  <div id="modalNotas" class="modal" style="display: none;">
+    <div class="modal-content">
+      <button id="btnCerrarNotas" class="close-btn">×</button>
+      <h3>Calculadora de Ponderación</h3>
+      <div id="contenedorNotas"></div>
+      <button id="btnAgregarNota">Agregar Nota</button>
+      <label for="notaMinima">Nota mínima para aprobar:</label>
+      <input type="number" id="notaMinima" value="40.0" step="0.1" min="1" max="7">
+      <h4 id="resultadoPonderacion"></h4>
+    </div>
+  </div>
+
+  <div id="notasContainer" style="display: none;">
+    <div id="notasFloatingActions">
+      <button id="volverMalla" title="Volver a la malla">
+        <i class="fa-solid fa-table"></i>
+      </button>
+      <button id="agregarNota" title="Agregar nota">
+        <i class="fa-solid fa-square-plus"></i>
+      </button>
+    </div>
+    <h2>Mis Notas</h2>
+    <div id="listaNotas"></div>
+  </div>
+
+  <div id="modalNuevaNota" class="modal" style="display: none;">
+    <div class="modal-content">
+      <button id="btnCerrarModalNuevaNota" class="close-btn">×</button>
+      <h3>Nueva Nota</h3>
+
+      <label>Título:</label>
+      <input type="text" id="notaTitulo" placeholder="Título de la nota">
+
+      <label>Color:</label>
+      <input type="color" id="notaColor" value="#f1c40f">
+
+      <button id="btnGuardarNuevaNota">Guardar Nota</button>
+    </div>
+  </div>
+
+  <div id="vistaNota" class="modal" style="display:none;">
+    <div class="modal-content hoja-nota">
+      <button id="cerrarVistaNota" class="btnCerrarModal">×</button>
+      <input type="text" id="vistaNotaTitulo" placeholder="Título de la nota" />
+      <textarea id="vistaNotaContenido" placeholder="Escribe tu nota aquí..."></textarea>
+      <button id="guardarVistaNota">Guardar cambios</button>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+  <script src="draganddrop.js"></script>
 </body>
+
 </html>
